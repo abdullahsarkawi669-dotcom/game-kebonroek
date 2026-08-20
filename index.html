@@ -1,0 +1,434 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGame Lengkap & Playable</title>
+    <style>
+        :root {
+            --clay-bg: #f4e8d8;
+            --clay-brown: #8d6e63;
+            --clay-green: #4caf50;
+            --clay-blue: #29b6f6;
+            --clay-red: #ef5350;
+            --text-main: #5d4037;
+        }
+        body {
+            margin: 0;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            background-color: var(--clay-bg);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+        .screen { display: none; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+        .screen.active { display: flex; flex-direction: column; align-items: center; }
+        
+        .clay-card {
+            background: white; border-radius: 20px; padding: 20px;
+            box-shadow: 0 8px 0 var(--clay-brown), 0 15px 20px rgba(0,0,0,0.2);
+            border: 4px solid var(--text-main); margin-bottom: 20px; text-align: center;
+            width: 100%; max-width: 400px;
+        }
+        .clay-btn {
+            background: var(--clay-green); color: white; border: 3px solid #2e7d32;
+            padding: 15px 30px; font-size: 1.2rem; border-radius: 15px; cursor: pointer;
+            box-shadow: 0 6px 0 #2e7d32; font-family: inherit; font-weight: bold; width: 100%; margin-top: 10px;
+        }
+        .clay-btn:active { transform: translateY(6px); box-shadow: 0 0 0 #2e7d32; }
+        .clay-btn.blue { background: var(--clay-blue); border-color: #0277bd; box-shadow: 0 6px 0 #0277bd; }
+        .clay-btn.red { background: var(--clay-red); border-color: #c62828; box-shadow: 0 6px 0 #c62828; }
+        
+        input[type="text"] {
+            width: 90%; padding: 15px; font-size: 1.2rem; border: 3px solid var(--clay-brown);
+            border-radius: 10px; margin-bottom: 20px; box-sizing: border-box;
+        }
+        .game-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; width: 100%; max-width: 800px; }
+        .game-item { background: #fff; border: 4px solid var(--text-main); border-radius: 20px; text-align: center; padding: 15px; box-shadow: 0 6px 0 var(--clay-brown); }
+        .game-img { height: 120px; border-radius: 10px; background-size: cover; background-position: center; border: 3px solid var(--clay-brown); margin-bottom: 10px; }
+        
+        #game-arena {
+            width: 100%; max-width: 600px; background: white; border-radius: 20px; padding: 20px;
+            border: 6px solid var(--clay-brown); min-height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;
+        }
+        .header-bar { display: flex; justify-content: space-between; width: 100%; max-width: 800px; align-items: center; margin-bottom: 20px; }
+        
+        /* Memory Game Styles */
+        .memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 400px; }
+        .memory-card { 
+            aspect-ratio: 1; background-color: var(--clay-blue); border-radius: 10px; cursor: pointer;
+            background-size: cover; background-position: center; border: 3px solid var(--text-main);
+            display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white;
+        }
+        .memory-card.hidden { background-image: none !important; background-color: var(--clay-blue); }
+        
+        /* Puzzle Game Styles */
+        .puzzle-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; width: 300px; height: 300px; background: #ddd; border: 4px solid var(--text-main); }
+        .puzzle-tile { width: 100%; height: 100%; background-size: 300px 300px; cursor: pointer; transition: transform 0.2s; }
+        .puzzle-empty { background: transparent !important; border: none; cursor: default; }
+
+        /* Catch Game Styles */
+        #catch-area { width: 100%; height: 300px; position: relative; background: #e0f7fa; border-radius: 10px; overflow: hidden; cursor: crosshair; }
+        .catch-target { width: 60px; height: 60px; border-radius: 50%; background-size: cover; background-position: center; position: absolute; border: 3px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.3); transition: all 0.1s; }
+
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="screen active">
+        <h1 style="text-align:center; color: var(--clay-brown);">WEBGAME<br>FOTO PLAYABLE</h1>
+        <div class="clay-card">
+            <h2>Masukkan Nama User:</h2>
+            <input type="text" id="username-input" placeholder="Ketik namamu..." autocomplete="off">
+            <button class="clay-btn" onclick="login()">LOGIN / MASUK</button>
+        </div>
+    </div>
+
+    <!-- DASHBOARD SCREEN -->
+    <div id="dashboard-screen" class="screen">
+        <div class="header-bar">
+            <h2>Halo, <span id="user-greeting">Player</span>! 👋</h2>
+            <button class="clay-btn blue" style="width:auto; padding: 10px;" onclick="showLeaderboard()">🏆 Top Score</button>
+        </div>
+        <div class="game-grid">
+            <div class="game-item">
+                <div class="game-img" style="background-image: url('clay-figure-1786795461416.png.jpg');"></div>
+                <h3>Memory Match (Keluarga)</h3>
+                <p>Top Score: <span id="sc-memory">0</span></p>
+                <button class="clay-btn" onclick="startGame('memory')">PLAY NOW</button>
+            </div>
+            <div class="game-item">
+                <div class="game-img" style="background-image: url('clay-figure-1786793688894.png.jpg');"></div>
+                <h3>Slide Puzzle (Diorama)</h3>
+                <p>Top Score: <span id="sc-puzzle">0</span></p>
+                <button class="clay-btn" onclick="startGame('puzzle')">PLAY NOW</button>
+            </div>
+            <div class="game-item">
+                <div class="game-img" style="background-image: url('clay-figure-1786795188085.png.jpg');"></div>
+                <h3>Tangkap Dino (Clicker)</h3>
+                <p>Top Score: <span id="sc-catch">0</span></p>
+                <button class="clay-btn" onclick="startGame('catch')">PLAY NOW</button>
+            </div>
+        </div>
+        <button class="clay-btn red" style="margin-top:30px; max-width: 200px;" onclick="logout()">LOGOUT</button>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="game-screen" class="screen">
+        <div class="header-bar">
+            <h3 style="margin:0;">Pemain: <span id="active-player"></span></h3>
+            <h3 style="margin:0;">Skor: <span id="current-score">0</span></h3>
+            <div>
+                <button class="clay-btn blue" style="width:auto; padding: 10px;" onclick="document.documentElement.requestFullscreen()">🔲</button>
+                <button class="clay-btn red" style="width:auto; padding: 10px;" onclick="exitGame()">✖</button>
+            </div>
+        </div>
+        <div id="game-arena"></div>
+    </div>
+
+    <!-- LEADERBOARD SCREEN -->
+    <div id="leaderboard-screen" class="screen">
+        <div class="clay-card" style="max-width: 600px; width: 100%;">
+            <h2>🏆 Papan Skor Global 🏆</h2>
+            <div id="lb-content" style="text-align: left;"></div>
+            <button class="clay-btn" style="margin-top:20px;" onclick="switchScreen('dashboard-screen')">Kembali</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const images = [
+        "clay-figure-1786793688894.png.jpg",
+        "clay-figure-1786793889596.png.jpg",
+        "clay-figure-1786795188085.png.jpg",
+		"clay-figure-1786795219346.png.jpg",
+        "figur-clay-3d-1786795461416.png.jpg",
+        "figur-clay-3d-1786795662862.png.jpg",
+        "IMG-20260815-WA0020.jpg",
+        "IMG-20260815-WA0021.jpg",
+		"IMG-20260815-WA0024.jpg",
+		"IMG-20260815-WA0025.jpg",
+		"IMG-20260815-WA0026.jpg",
+		"IMG-20260815-WA0027.jpg",
+		"IMG-20260815-WA0028.jpg",
+		
+    ];
+
+    let currentUser = "";
+    let currentGame = "";
+    let score = 0;
+    let gameInterval;
+
+    function init() {
+        if(localStorage.getItem('wg_user')) {
+            currentUser = localStorage.getItem('wg_user');
+            updateDash();
+            switchScreen('dashboard-screen');
+        }
+    }
+
+    function switchScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function login() {
+        const val = document.getElementById('username-input').value.trim();
+        if(!val) return alert("Isi nama dulu!");
+        currentUser = val;
+        localStorage.setItem('wg_user', currentUser);
+        updateDash();
+        switchScreen('dashboard-screen');
+    }
+
+    function logout() {
+        localStorage.removeItem('wg_user');
+        currentUser = "";
+        switchScreen('login-screen');
+    }
+
+    function updateDash() {
+        document.getElementById('user-greeting').innerText = currentUser;
+        document.getElementById('active-player').innerText = currentUser;
+        document.getElementById('sc-memory').innerText = localStorage.getItem('wg_sc_memory_'+currentUser) || 0;
+        document.getElementById('sc-puzzle').innerText = localStorage.getItem('wg_sc_puzzle_'+currentUser) || 0;
+        document.getElementById('sc-catch').innerText = localStorage.getItem('wg_sc_catch_'+currentUser) || 0;
+    }
+
+    function saveScore(gameType, finalScore) {
+        let currentBest = parseInt(localStorage.getItem('wg_sc_'+gameType+'_'+currentUser)) || 0;
+        if(finalScore > currentBest) {
+            localStorage.setItem('wg_sc_'+gameType+'_'+currentUser, finalScore);
+        }
+        
+        // Save to global list
+        let lb = JSON.parse(localStorage.getItem('wg_leaderboard')) || [];
+        lb.push({name: currentUser, game: gameType, score: finalScore});
+        localStorage.setItem('wg_leaderboard', JSON.stringify(lb));
+    }
+
+    function exitGame() {
+        clearInterval(gameInterval);
+        document.getElementById('game-arena').innerHTML = "";
+        updateDash();
+        switchScreen('dashboard-screen');
+        if (document.fullscreenElement) document.exitFullscreen();
+    }
+
+    function startGame(type) {
+        currentGame = type;
+        score = 0;
+        document.getElementById('current-score').innerText = score;
+        const arena = document.getElementById('game-arena');
+        arena.innerHTML = "";
+        switchScreen('game-screen');
+
+        if(type === 'memory') startMemory(arena);
+        if(type === 'puzzle') startPuzzle(arena);
+        if(type === 'catch') startCatch(arena);
+    }
+
+    // --- GAME 1: MEMORY MATCH ---
+    function startMemory(arena) {
+        let deck = [...images, images[0]]; // 8 unique images needed, we have 7, duplicate 1st to make 8
+        deck = [...deck, ...deck].sort(() => 0.5 - Math.random()); // 16 cards total
+        
+        const grid = document.createElement('div');
+        grid.className = 'memory-grid';
+        let flipped = [];
+        let matched = 0;
+        let moves = 0;
+
+        deck.forEach((imgSrc, idx) => {
+            let card = document.createElement('div');
+            card.className = 'memory-card hidden';
+            card.dataset.val = imgSrc;
+            card.innerText = "?";
+            
+            card.onclick = () => {
+                if(flipped.length < 2 && card.classList.contains('hidden')) {
+                    card.classList.remove('hidden');
+                    card.style.backgroundImage = `url('${imgSrc}')`;
+                    card.innerText = "";
+                    flipped.push(card);
+
+                    if(flipped.length === 2) {
+                        moves++;
+                        setTimeout(() => {
+                            if(flipped[0].dataset.val === flipped[1].dataset.val) {
+                                matched += 2;
+                                score += 100; // 100 pts per match
+                                document.getElementById('current-score').innerText = score;
+                                if(matched === 16) {
+                                    let finalScore = score + (1000 - moves*10); // Bonus moves
+                                    alert("Menang! Skor: " + finalScore);
+                                    saveScore('memory', finalScore);
+                                    exitGame();
+                                }
+                            } else {
+                                flipped[0].classList.add('hidden'); flipped[0].style.backgroundImage = ''; flipped[0].innerText = "?";
+                                flipped[1].classList.add('hidden'); flipped[1].style.backgroundImage = ''; flipped[1].innerText = "?";
+                            }
+                            flipped = [];
+                        }, 800);
+                    }
+                }
+            };
+            grid.appendChild(card);
+        });
+        arena.appendChild(grid);
+    }
+
+    // --- GAME 2: SLIDE PUZZLE ---
+    function startPuzzle(arena) {
+        let size = 3; // 3x3
+        let puzzleImg = images[0]; // Diorama
+        let grid = document.createElement('div');
+        grid.className = 'puzzle-grid';
+        
+        let tiles = Array.from({length: size*size}, (_, i) => i);
+        // Shuffle solvable (simple random shuffle might be unsolvable, but for simulation we just shuffle)
+        tiles.sort(() => 0.5 - Math.random());
+        
+        let moves = 0;
+
+        function renderPuzzle() {
+            grid.innerHTML = "";
+            let isWin = true;
+            tiles.forEach((val, idx) => {
+                let t = document.createElement('div');
+                t.className = 'puzzle-tile';
+                if(val === size*size - 1) {
+                    t.classList.add('puzzle-empty');
+                } else {
+                    t.style.backgroundImage = `url('${puzzleImg}')`;
+                    let row = Math.floor(val / size);
+                    let col = val % size;
+                    t.style.backgroundPosition = `-${col * 100}px -${row * 100}px`;
+                }
+                if(val !== idx) isWin = false;
+
+                t.onclick = () => {
+                    let emptyIdx = tiles.indexOf(size*size - 1);
+                    // Check if adjacent
+                    let validMoves = [emptyIdx-1, emptyIdx+1, emptyIdx-size, emptyIdx+size];
+                    // Handle edge cases for left/right
+                    if(emptyIdx % size === 0) validMoves = validMoves.filter(m => m !== emptyIdx-1);
+                    if((emptyIdx+1) % size === 0) validMoves = validMoves.filter(m => m !== emptyIdx+1);
+                    
+                    if(validMoves.includes(idx)) {
+                        tiles[emptyIdx] = tiles[idx];
+                        tiles[idx] = size*size - 1;
+                        moves++;
+                        score = Math.max(0, 5000 - (moves * 50));
+                        document.getElementById('current-score').innerText = score;
+                        renderPuzzle();
+                    }
+                };
+                grid.appendChild(t);
+            });
+
+            if(isWin && moves > 0) { // moves > 0 prevents instant win on lucky shuffle
+                setTimeout(() => {
+                    alert("Teka-teki Selesai! Skor: " + score);
+                    saveScore('puzzle', score);
+                    exitGame();
+                }, 100);
+            }
+        }
+        renderPuzzle();
+        
+        let hint = document.createElement('p');
+        hint.innerText = "Klik kotak di sebelah ruang kosong untuk menggeser.";
+        arena.appendChild(grid);
+        arena.appendChild(hint);
+    }
+
+    // --- GAME 3: CATCH OBJECT ---
+    function startCatch(arena) {
+        let area = document.createElement('div');
+        area.id = 'catch-area';
+        let target = document.createElement('div');
+        target.className = 'catch-target';
+        
+        let timeRemaining = 30; // 30 seconds
+        let timerDisplay = document.createElement('h2');
+        timerDisplay.innerText = "Waktu: " + timeRemaining;
+        
+        arena.appendChild(timerDisplay);
+        arena.appendChild(area);
+        area.appendChild(target);
+
+        function moveTarget() {
+            let maxX = area.clientWidth - 60;
+            let maxY = area.clientHeight - 60;
+            target.style.left = Math.floor(Math.random() * maxX) + 'px';
+            target.style.top = Math.floor(Math.random() * maxY) + 'px';
+            // Random image from the array
+            target.style.backgroundImage = `url('${images[Math.floor(Math.random() * images.length)]}')`;
+        }
+        
+        target.onclick = () => {
+            score += 10;
+            document.getElementById('current-score').innerText = score;
+            moveTarget();
+        };
+
+        moveTarget();
+        
+        gameInterval = setInterval(() => {
+            timeRemaining--;
+            timerDisplay.innerText = "Waktu: " + timeRemaining;
+            if(Math.random() > 0.3) moveTarget(); // Sometimes jumps on its own
+            
+            if(timeRemaining <= 0) {
+                clearInterval(gameInterval);
+                alert("Waktu Habis! Skor Akhir: " + score);
+                saveScore('catch', score);
+                exitGame();
+            }
+        }, 1000);
+    }
+
+    // --- LEADERBOARD ---
+    function showLeaderboard() {
+        let lb = JSON.parse(localStorage.getItem('wg_leaderboard')) || [];
+        // Sort by highest score
+        lb.sort((a, b) => b.score - a.score);
+        
+        // Remove duplicates keeping only best score per user per game
+        let uniqueLb = [];
+        let seen = new Set();
+        lb.forEach(entry => {
+            let key = entry.name + "_" + entry.game;
+            if(!seen.has(key)) {
+                seen.add(key);
+                uniqueLb.push(entry);
+            }
+        });
+
+        let content = "<table style='width:100%; border-collapse:collapse; margin-top:20px;'>";
+        content += "<tr style='background:var(--clay-brown); color:white;'><th>Rank</th><th>Pemain</th><th>Game</th><th>Skor</th></tr>";
+        
+        if(uniqueLb.length === 0) content += "<tr><td colspan='4' style='text-align:center;'>Belum ada data skor.</td></tr>";
+        
+        uniqueLb.slice(0, 10).forEach((row, i) => { // Top 10
+            content += `<tr style='border-bottom:1px solid #ccc; text-align:center;'>
+                <td style='padding:10px;'>${i+1}</td>
+                <td>${row.name}</td>
+                <td>${row.game.toUpperCase()}</td>
+                <td>${row.score}</td>
+            </tr>`;
+        });
+        content += "</table>";
+        
+        document.getElementById('lb-content').innerHTML = content;
+        switchScreen('leaderboard-screen');
+    }
+
+    init();
+</script>
+</body>
+</html>
