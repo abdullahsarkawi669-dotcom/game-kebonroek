@@ -1,434 +1,647 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebGame Lengkap & Playable</title>
-    <style>
-        :root {
-            --clay-bg: #f4e8d8;
-            --clay-brown: #8d6e63;
-            --clay-green: #4caf50;
-            --clay-blue: #29b6f6;
-            --clay-red: #ef5350;
-            --text-main: #5d4037;
-        }
-        body {
-            margin: 0;
-            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
-            background-color: var(--clay-bg);
-            color: var(--text-main);
-            overflow-x: hidden;
-        }
-        .screen { display: none; min-height: 100vh; padding: 20px; box-sizing: border-box; }
-        .screen.active { display: flex; flex-direction: column; align-items: center; }
-        
-        .clay-card {
-            background: white; border-radius: 20px; padding: 20px;
-            box-shadow: 0 8px 0 var(--clay-brown), 0 15px 20px rgba(0,0,0,0.2);
-            border: 4px solid var(--text-main); margin-bottom: 20px; text-align: center;
-            width: 100%; max-width: 400px;
-        }
-        .clay-btn {
-            background: var(--clay-green); color: white; border: 3px solid #2e7d32;
-            padding: 15px 30px; font-size: 1.2rem; border-radius: 15px; cursor: pointer;
-            box-shadow: 0 6px 0 #2e7d32; font-family: inherit; font-weight: bold; width: 100%; margin-top: 10px;
-        }
-        .clay-btn:active { transform: translateY(6px); box-shadow: 0 0 0 #2e7d32; }
-        .clay-btn.blue { background: var(--clay-blue); border-color: #0277bd; box-shadow: 0 6px 0 #0277bd; }
-        .clay-btn.red { background: var(--clay-red); border-color: #c62828; box-shadow: 0 6px 0 #c62828; }
-        
-        input[type="text"] {
-            width: 90%; padding: 15px; font-size: 1.2rem; border: 3px solid var(--clay-brown);
-            border-radius: 10px; margin-bottom: 20px; box-sizing: border-box;
-        }
-        .game-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; width: 100%; max-width: 800px; }
-        .game-item { background: #fff; border: 4px solid var(--text-main); border-radius: 20px; text-align: center; padding: 15px; box-shadow: 0 6px 0 var(--clay-brown); }
-        .game-img { height: 120px; border-radius: 10px; background-size: cover; background-position: center; border: 3px solid var(--clay-brown); margin-bottom: 10px; }
-        
-        #game-arena {
-            width: 100%; max-width: 600px; background: white; border-radius: 20px; padding: 20px;
-            border: 6px solid var(--clay-brown); min-height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;
-        }
-        .header-bar { display: flex; justify-content: space-between; width: 100%; max-width: 800px; align-items: center; margin-bottom: 20px; }
-        
-        /* Memory Game Styles */
-        .memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 400px; }
-        .memory-card { 
-            aspect-ratio: 1; background-color: var(--clay-blue); border-radius: 10px; cursor: pointer;
-            background-size: cover; background-position: center; border: 3px solid var(--text-main);
-            display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white;
-        }
-        .memory-card.hidden { background-image: none !important; background-color: var(--clay-blue); }
-        
-        /* Puzzle Game Styles */
-        .puzzle-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; width: 300px; height: 300px; background: #ddd; border: 4px solid var(--text-main); }
-        .puzzle-tile { width: 100%; height: 100%; background-size: 300px 300px; cursor: pointer; transition: transform 0.2s; }
-        .puzzle-empty { background: transparent !important; border: none; cursor: default; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#0f766e">
+	<link rel="manifest" href="manifest.json">
+	<meta name="theme-color" content="#2563eb">
+<title>Game Kebon Roek - Family Center</title>
+<style>
+:root{
+  --bg:#f5f7f2;--surface:#fff;--ink:#173b32;--muted:#6b7d76;
+  --primary:#0f766e;--primary2:#14b8a6;--accent:#f59e0b;--danger:#ef4444;
+  --shadow:0 12px 35px rgba(23,59,50,.12);--radius:22px;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);
+background:radial-gradient(circle at 10% 0%,#dff7ef 0,transparent 28%),linear-gradient(135deg,#f8faf7,#eef7f2);min-height:100vh}
+button,input{font:inherit}
+button{cursor:pointer}
+.screen{display:none;min-height:100vh;padding:20px}
+.screen.active{display:flex;flex-direction:column}
+.container{width:min(1120px,100%);margin:auto}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;font-size:25px;box-shadow:0 8px 20px rgba(15,118,110,.25)}
+h1,h2,h3,p{margin-top:0}
+.muted{color:var(--muted)}
+.card{background:rgba(255,255,255,.9);border:1px solid rgba(15,118,110,.1);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);backdrop-filter:blur(8px)}
+.hero{display:grid;grid-template-columns:1.25fr .75fr;gap:20px;align-items:stretch;margin-bottom:22px}
+.hero-main{padding:34px;border-radius:28px;background:linear-gradient(135deg,#0f766e,#0b5f59);color:#fff;position:relative;overflow:hidden}
+.hero-main:after{content:"🌿";position:absolute;font-size:150px;right:-10px;bottom:-50px;opacity:.13}
+.hero-main h1{font-size:clamp(2rem,5vw,4rem);line-height:1;margin:8px 0 14px}
+.hero-main p{max-width:650px;color:#d7ffef}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin:15px 0}
+.badge{padding:7px 11px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.85rem}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:#f1faf7;border-radius:16px;padding:14px;text-align:center}
+.stat strong{display:block;font-size:1.5rem;color:var(--primary)}
+.btn{border:0;border-radius:14px;padding:12px 16px;font-weight:800;transition:.18s;box-shadow:0 5px 0 rgba(0,0,0,.12)}
+.btn:hover{transform:translateY(-2px)}.btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.12)}
+.btn.primary{background:var(--primary);color:#fff}.btn.secondary{background:#dff7ef;color:var(--primary)}
+.btn.accent{background:var(--accent);color:#fff}.btn.danger{background:var(--danger);color:#fff}.btn.dark{background:#173b32;color:#fff}
+.btn.small{padding:9px 12px;font-size:.9rem}
+.login{align-items:center;justify-content:center;background:radial-gradient(circle at 50% 10%,#c9f3e7,#f5f7f2 55%)}
+.login-box{width:min(480px,100%);text-align:center;padding:32px}
+.login-icon{font-size:64px}.login-box h1{font-size:clamp(2.2rem,8vw,4rem);margin:5px 0}
+.input{width:100%;padding:15px;border:2px solid #d6e5df;border-radius:14px;outline:none;background:#fbfdfc;margin:10px 0 14px}
+.input:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(20,184,166,.12)}
+.section-title{display:flex;justify-content:space-between;align-items:end;gap:10px;margin:20px 0 12px}
+.game-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}
+.game-card{position:relative;overflow:hidden;transition:.2s}
+.game-card:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(23,59,50,.16)}
+.game-icon{height:100px;border-radius:18px;display:grid;place-items:center;font-size:52px;background:linear-gradient(135deg,#e7faf3,#fff4d8);margin-bottom:15px}
+.game-card h3{margin-bottom:6px}.game-card p{font-size:.9rem;min-height:42px}
+.game-meta{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.score-pill{font-size:.82rem;background:#f2f6f4;padding:6px 9px;border-radius:999px}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px}
+.game-layout{width:min(900px,100%);margin:auto}
+.arena{min-height:470px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.game-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px;flex-wrap:wrap}
+.live-score{font-weight:900;background:#e7faf3;color:var(--primary);padding:9px 14px;border-radius:999px}
 
-        /* Catch Game Styles */
-        #catch-area { width: 100%; height: 300px; position: relative; background: #e0f7fa; border-radius: 10px; overflow: hidden; cursor: crosshair; }
-        .catch-target { width: 60px; height: 60px; border-radius: 50%; background-size: cover; background-position: center; position: absolute; border: 3px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.3); transition: all 0.1s; }
+.memory-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:min(500px,100%)}
+.memory-card{aspect-ratio:1;border:0;border-radius:16px;color:#fff;font-size:30px;font-weight:900;box-shadow:0 5px 0 rgba(0,0,0,0.1);transition:.18s;overflow:hidden;background-size:cover;background-position:center;}
+.memory-card.back {background:linear-gradient(135deg,#0f766e,#14b8a6);}
+.memory-card.open{box-shadow:0 5px 0 #dcebe5}
+.memory-card.matched{box-shadow:0 5px 0 #efd38a; opacity:0.6;} 
 
-    </style>
+.puzzle{display:grid;grid-template-columns:repeat(3,1fr);width:min(330px,90vw);aspect-ratio:1;gap:3px;background:#173b32;padding:3px;border-radius:14px}
+.tile{border:0;border-radius:5px;background-color:#dff7ef;transition:transform 0.15s, outline 0.15s;background-repeat:no-repeat;}
+.empty{visibility:hidden}
+
+.catch-area{width:100%;height:330px;border-radius:20px;position:relative;overflow:hidden;background:linear-gradient(#dff7ef,#fff8dc);border:2px solid #d8ebe5}
+.target{position:absolute;width:65px;height:65px;border:2px solid #fff;border-radius:50%;overflow:hidden;box-shadow:0 7px 18px rgba(0,0,0,.18);padding:0;background-size:cover;background-position:center;}
+
+.quiz-box{width:min(650px,100%)}.quiz-options{display:grid;gap:10px;margin-top:20px}.option{border:2px solid #dbe9e4;background:#fff;padding:14px;border-radius:14px;text-align:left;font-weight:750}.option:hover{border-color:var(--primary);background:#f0fbf8}.option.correct{background:#dcfce7;border-color:#22c55e}.option.wrong{background:#fee2e2;border-color:#ef4444}
+.reaction-pad{width:min(600px,100%);height:260px;border-radius:24px;border:0;background:#e9eef0;color:#173b32;font-size:2rem;font-weight:900}.reaction-pad.ready{background:#f59e0b;color:#fff}.reaction-pad.go{background:#16a34a;color:#fff}
+.math-question{font-size:clamp(2.5rem,8vw,5rem);font-weight:950;margin:15px}.math-options{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;width:min(480px,100%)}.math-options button{padding:18px;border:0;border-radius:16px;background:#dff7ef;color:var(--primary);font-size:1.4rem;font-weight:900}
+.whack-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:min(420px,100%)}.hole{aspect-ratio:1;border:0;border-radius:50%;background:#d7e8e1;font-size:40px}.hole.active{background:#fff0c2}
+.typing-word{font-size:clamp(2rem,7vw,4rem);font-weight:950;letter-spacing:4px;color:var(--primary)}
+.leaderboard{width:min(750px,100%);margin:auto}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:11px;border-bottom:1px solid #e5ece9;text-align:center}.table th{background:#edf8f4}
+.toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,120px);background:#173b32;color:#fff;padding:12px 18px;border-radius:9999px;opacity:0;transition:.25s;z-index:20}.toast.show{transform:translate(-50%,0);opacity:1}
+.footer{text-align:center;color:var(--muted);padding:25px 0}
+@media(max-width:900px){.game-grid{grid-template-columns:repeat(2,1fr)}.hero{grid-template-columns:1fr}}
+@media(max-width:560px){.screen{padding:12px}.game-grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr 1fr}.card{padding:16px}.hero-main{padding:25px}.memory-grid{gap:7px}.memory-card{font-size:22px}.topbar h2{font-size:1.1rem}.math-options{grid-template-columns:1fr 1fr}}
+
+/* Class untuk gambar ikon di menu utama */
+.game-icon-img {
+    height: 100px;
+    width: 100%;
+    border-radius: 18px;
+    object-fit: cover;
+    display: block;
+}
+</style>
 </head>
 <body>
 
-<div id="app">
-    <!-- LOGIN SCREEN -->
-    <div id="login-screen" class="screen active">
-        <h1 style="text-align:center; color: var(--clay-brown);">WEBGAME<br>FOTO PLAYABLE</h1>
-        <div class="clay-card">
-            <h2>Masukkan Nama User:</h2>
-            <input type="text" id="username-input" placeholder="Ketik namamu..." autocomplete="off">
-            <button class="clay-btn" onclick="login()">LOGIN / MASUK</button>
-        </div>
-    </div>
+<section id="login-screen" class="screen login active">
+  <div class="card login-box">
+    <div class="login-icon">🌿🎮</div>
+    <div class="badge" style="display:inline-block;background:#e7faf3;color:#0f766e">KEBON ROEK • FAMILY CENTER</div>
+    <h1>Game Keluarga</h1>
+    <p class="muted">Kumpulan mini game seru dengan foto keluarga. Main santai, kumpulkan skor, dan pecahkan rekor!</p>
+    <input id="username" class="input" maxlength="24" placeholder="Masukkan nama pemain..." autocomplete="off">
+    <button class="btn primary" style="width:100%" onclick="login()">🚀 Mulai Bermain</button>
+    <p style="font-size:.8rem;margin:18px 0 0;color:#84938e">Data skor tersimpan di browser perangkat ini.</p>
+  </div>
+</section>
 
-    <!-- DASHBOARD SCREEN -->
-    <div id="dashboard-screen" class="screen">
-        <div class="header-bar">
-            <h2>Halo, <span id="user-greeting">Player</span>! 👋</h2>
-            <button class="clay-btn blue" style="width:auto; padding: 10px;" onclick="showLeaderboard()">🏆 Top Score</button>
-        </div>
-        <div class="game-grid">
-            <div class="game-item">
-                <div class="game-img" style="background-image: url('clay-figure-1786795461416.png.jpg');"></div>
-                <h3>Memory Match (Keluarga)</h3>
-                <p>Top Score: <span id="sc-memory">0</span></p>
-                <button class="clay-btn" onclick="startGame('memory')">PLAY NOW</button>
-            </div>
-            <div class="game-item">
-                <div class="game-img" style="background-image: url('clay-figure-1786793688894.png.jpg');"></div>
-                <h3>Slide Puzzle (Diorama)</h3>
-                <p>Top Score: <span id="sc-puzzle">0</span></p>
-                <button class="clay-btn" onclick="startGame('puzzle')">PLAY NOW</button>
-            </div>
-            <div class="game-item">
-                <div class="game-img" style="background-image: url('clay-figure-1786795188085.png.jpg');"></div>
-                <h3>Tangkap Dino (Clicker)</h3>
-                <p>Top Score: <span id="sc-catch">0</span></p>
-                <button class="clay-btn" onclick="startGame('catch')">PLAY NOW</button>
-            </div>
-        </div>
-        <button class="clay-btn red" style="margin-top:30px; max-width: 200px;" onclick="logout()">LOGOUT</button>
+<section id="dashboard-screen" class="screen">
+<div class="container">
+  <div class="topbar">
+    <div class="brand"><div class="logo">🌿</div><div><b>Kebon Roek Family</b><div class="muted" style="font-size:.8rem">Game Center</div></div></div>
+    <div class="toolbar">
+      <button class="btn secondary small" onclick="showLeaderboard()">🏆 Papan Skor</button>
+      <button class="btn danger small" onclick="logout()">Keluar</button>
     </div>
+  </div>
 
-    <!-- GAME SCREEN -->
-    <div id="game-screen" class="screen">
-        <div class="header-bar">
-            <h3 style="margin:0;">Pemain: <span id="active-player"></span></h3>
-            <h3 style="margin:0;">Skor: <span id="current-score">0</span></h3>
-            <div>
-                <button class="clay-btn blue" style="width:auto; padding: 10px;" onclick="document.documentElement.requestFullscreen()">🔲</button>
-                <button class="clay-btn red" style="width:auto; padding: 10px;" onclick="exitGame()">✖</button>
-            </div>
-        </div>
-        <div id="game-arena"></div>
+  <div class="hero">
+    <div class="hero-main">
+      <div class="badge">SELAMAT DATANG 👋</div>
+      <h1>Halo, <span id="greeting">Pemain</span>!</h1>
+      <p>Pilih game favoritmu yang kini menampilkan foto-foto keluarga secara acak. Semakin sering bermain, semakin tinggi skor terbaikmu.</p>
+      <div class="badges"><span class="badge">⚡ Cepat</span><span class="badge">🧠 Cerdas</span><span class="badge">🎯 Seru</span><span class="badge">📱 Responsif</span><span class="badge">👨‍👩‍👧‍👦 Keluarga</span></div>
     </div>
+    <div class="card">
+      <h3>📊 Statistik Kamu</h3>
+      <div class="stats">
+        <div class="stat"><strong id="best-total">0</strong><span>Skor terbaik</span></div>
+        <div class="stat"><strong id="games-played">0</strong><span>Permainan</span></div>
+        <div class="stat"><strong id="best-game">-</strong><span>Teratas</span></div>
+      </div>
+    </div>
+  </div>
 
-    <!-- LEADERBOARD SCREEN -->
-    <div id="leaderboard-screen" class="screen">
-        <div class="clay-card" style="max-width: 600px; width: 100%;">
-            <h2>🏆 Papan Skor Global 🏆</h2>
-            <div id="lb-content" style="text-align: left;"></div>
-            <button class="clay-btn" style="margin-top:20px;" onclick="switchScreen('dashboard-screen')">Kembali</button>
-        </div>
-    </div>
+  <div class="section-title"><div><h2>🎮 Pilih Permainan</h2><div class="muted">9 mini game dengan tema keluarga</div></div></div>
+  <div class="game-grid" id="game-grid"></div>
+  <div class="footer">🌿 Game Kebon Roek • Dibuat untuk bermain, belajar, dan bersenang-senang bersama keluarga.</div>
 </div>
+</section>
+
+<section id="game-screen" class="screen">
+<div class="game-layout">
+  <div class="topbar">
+    <button class="btn secondary small" onclick="exitGame()">← Menu Utama</button>
+    <div class="live-score">⭐ <span id="current-score">0</span></div>
+    <button class="btn dark small" onclick="toggleFullscreen()">⛶</button>
+  </div>
+  <div class="card">
+    <div class="game-head"><div><h2 id="game-title" style="margin-bottom:3px">Game</h2><span class="muted" id="game-subtitle"></span></div><div id="game-timer"></div></div>
+    <div id="arena" class="arena"></div>
+  </div>
+</div>
+</section>
+
+<section id="leaderboard-screen" class="screen">
+<div class="leaderboard">
+  <div class="topbar"><h2>🏆 Papan Skor</h2><button class="btn secondary small" onclick="switchScreen('dashboard-screen')">← Kembali</button></div>
+  <div class="card"><div id="lb-content"></div></div>
+</div>
+</section>
+
+<div id="toast" class="toast"></div>
 
 <script>
-    const images = [
-        "clay-figure-1786793688894.png.jpg",
-        "clay-figure-1786793889596.png.jpg",
-        "clay-figure-1786795188085.png.jpg",
-		"clay-figure-1786795219346.png.jpg",
-        "figur-clay-3d-1786795461416.png.jpg",
-        "figur-clay-3d-1786795662862.png.jpg",
-        "IMG-20260815-WA0020.jpg",
-        "IMG-20260815-WA0021.jpg",
-		"IMG-20260815-WA0024.jpg",
-		"IMG-20260815-WA0025.jpg",
-		"IMG-20260815-WA0026.jpg",
-		"IMG-20260815-WA0027.jpg",
-		"IMG-20260815-WA0028.jpg",
-		
-    ];
+// Array sumber gambar
+const familyImages = [
+  'gambar (01).jpg',
+  'gambar (02).jpg',
+  'gambar (03).jpg',
+  'gambar (04).jpg',
+  'gambar (05).jpg',
+  'gambar (06).jpg',
+  'gambar (07).jpg',
+  'gambar (08).jpg',
+  'gambar (09).jpg'
+];
 
-    let currentUser = "";
-    let currentGame = "";
-    let score = 0;
-    let gameInterval;
+const GAMES=[
+ {id:'memory',icon:'gambar (05).jpg',name:'Memory Keluarga',desc:'Temukan pasangan foto keluarga.',color:'Hijau'},
+ {id:'puzzle',icon:'gambar (02).jpg',name:'Slide Puzzle',desc:'Susun puzzle foto keluarga.',color:'Puzzle'},
+ {id:'jigsaw',icon:'gambar (03).jpg',name:'Jigsaw Puzzle',desc:'Rakit foto yang terpecah.',color:'Biru'},
+ {id:'catch',icon:'gambar (04).jpg',name:'Tangkap Foto',desc:'Tangkap foto keluarga acak!',color:'Refleks'},
+ {id:'quiz',icon:'',name:'Kuis Cepat',desc:'Jawab pertanyaan pengetahuan umum.',color:'Kuis', defaultIcon: '❓'},
+ {id:'reaction',icon:'',name:'Reaction Test',desc:'Uji seberapa cepat reaksimu.',color:'Kecepatan', defaultIcon: '⚡'},
+ {id:'math',icon:'',name:'Math Rush',desc:'Pilih jawaban matematika yang benar.',color:'Matematika', defaultIcon: '➗'},
+ {id:'whack',icon:'',name:'Pukul Target',desc:'Klik target yang muncul sebanyak mungkin.',color:'Arcade', defaultIcon: '🐹'},
+ {id:'typing',icon:'',name:'Ketik Cepat',desc:'Ketik kata sebelum waktunya habis.',color:'Mengetik', defaultIcon: '⌨️'}
+];
 
-    function init() {
-        if(localStorage.getItem('wg_user')) {
-            currentUser = localStorage.getItem('wg_user');
-            updateDash();
-            switchScreen('dashboard-screen');
-        }
+
+const quizData=[
+    ["Siapa yang belum sunat...","Adam",["Raja","Ino","Fikar"]],
+    ["Hewan yang mengalami metamorfosis sempurna adalah...","Kupu-kupu",["Kucing","Ayam","Ikan"]],
+    ["Setahun ada berapakah bulan...","12",["1","13","9"]],
+    ["Siapa yang masih pakai popok...","Tiera",["Ino","Adam","Fikar"]],
+    ["Sekolah kita ada di...","Kebon Roek",["Dayen Peken","Batu Gepeng","Kampung Arab"]],
+    ["Simbol kimia untuk air adalah...","H₂O",["CO₂","O₂","NaCl"]],
+    ["7 hari sama dengan...","1 pekan",["10 hari","2 minggu","1 bulan"]],
+    ["Bahasa yang sering digunakan untuk pasar adalah...","sasak",["jawa","arab","cina"]],
+    ["Saat bangun tidur, sebaiknya kita...","Berdoa",["Bermain","Berteriak","Marah-marah"]],
+    ["Sebelum makan kita sebaiknya...","Membaca basmalah",["Berteriak","Bermain","Tidur"]],
+    ["Saat makan sebaiknya menggunakan tangan...","Kanan",["Kiri","Kaki","Bebas"]],
+    ["Setelah selesai makan kita mengucapkan...","Alhamdulillah",["Selamat pagi","Permisi","Sampai jumpa"]],
+    ["Jika ingin meminjam barang milik kakak, kita harus...","Meminta izin",["Mengambil diam-diam","Menyembunyikan","Merusaknya"]],
+    ["Jika ibu sedang memasak, kita sebaiknya...","Membantu jika mampu",["Mengganggu","Bermain di dapur","Mengotori dapur"]],
+    ["Jika ayah sedang berbicara, kita sebaiknya...","Mendengarkan dengan sopan",["Memotong pembicaraan","Berteriak","Pergi sambil membanting pintu"]],
+    ["Jika adik sedang tidur, kita sebaiknya...","Menjaga agar tidak berisik",["Berteriak","Menyalakan suara keras","Membangunkannya untuk bermain"]],
+    ["Jika kakak membantu kita, kita mengucapkan...","Terima kasih",["Pergi begitu saja","Diam","Marah"]],
+    ["Jika melakukan kesalahan kepada ibu, kita sebaiknya...","Meminta maaf",["Berbohong","Menyalahkan adik","Kabur"]],
+    ["Jika tidak sengaja memecahkan barang ayah, kita sebaiknya...","Mengaku dengan jujur",["Menyembunyikannya","Berbohong","Menyalahkan orang lain"]],
+    ["Saat masuk rumah, kita dianjurkan mengucapkan...","Salam",["Teriakan","Nyanyian","Sorakan"]],
+    ["Saat keluar rumah, kita sebaiknya...","Meminta izin kepada orang tua",["Pergi diam-diam","Membanting pintu","Berteriak"]],
+    ["Jika ibu memanggil, sebaiknya kita...","Menjawab dan menghampirinya",["Pura-pura tidak dengar","Berlari menjauh","Marah"]],
+    ["Jika ayah meminta bantuan, kita sebaiknya...","Membantu dengan sopan",["Menolak kasar","Mengeluh","Mengabaikan"]],
+    ["Jika orang tua sedang lelah, kita sebaiknya...","Membantu dan tidak membuat gaduh",["Berteriak","Meminta bermain","Mengganggu"]],
+    ["Menjaga kebersihan rumah merupakan tanggung jawab...","Semua anggota keluarga",["Ibu saja","Ayah saja","Adik saja"]],
+    ["Setelah bermain, mainan sebaiknya...","Dirapikan kembali",["Dibiarkan berserakan","Dilempar","Disembunyikan"]],
+    ["Setelah bangun tidur, tempat tidur sebaiknya...","Dirapikan",["Dibiarkan berantakan","Dilempar bantalnya","Ditinggalkan"]],
+    ["Baju kotor sebaiknya...","Dimasukkan ke tempat pakaian kotor",["Dibuang","Ditaruh di lantai","Disembunyikan"]],
+    ["Sepatu setelah digunakan sebaiknya...","Diletakkan dengan rapi",["Dilempar","Dibiarkan di tengah jalan","Disembunyikan"]],
+    ["Jika mendapat makanan dari ibu, kita sebaiknya...","Bersyukur dan berterima kasih",["Mengeluh","Membuangnya","Meminta makanan lain dengan marah"]],
+    ["Jika makanan tidak sesuai selera, sebaiknya...","Tidak mencela makanan",["Mengejek masakan","Membuangnya","Marah kepada ibu"]],
+    ["Saat makan bersama keluarga, kita sebaiknya...","Menjaga adab dan sopan santun",["Berebut makanan","Berteriak","Mengganggu orang lain"]],
+    ["Jika ingin mengambil makanan yang jauh, sebaiknya...","Meminta bantuan dengan sopan",["Berdiri di atas meja","Merebut","Berteriak"]],
+    ["Saat makan sebaiknya tidak...","Berlebihan",["Bersyukur","Duduk dengan baik","Menggunakan tangan kanan"]],
+    ["Jika kenyang, kita sebaiknya...","Berhenti makan dengan baik",["Memaksakan diri","Membuang makanan","Mengacak-acak makanan"]],
+    ["Membuang makanan dengan sengaja adalah perbuatan yang...","Tidak baik",["Terpuji","Wajib","Sangat dianjurkan"]],
+    ["Jika melihat makanan terjatuh, kita sebaiknya...","Membersihkannya dengan baik",["Menertawakan","Membiarkannya","Menendangnya"]],
+    ["Saat minum bersama teman, kita sebaiknya...","Tidak berebut",["Merebut gelas","Mendorong teman","Berteriak"]],
+    ["Setelah makan, tempat makan sebaiknya...","Dibereskan",["Ditinggalkan berantakan","Dilempar","Disembunyikan"]],
+    ["Saat bertemu guru, kita sebaiknya...","Mengucapkan salam dan menyapa dengan sopan",["Berteriak","Berpaling","Mengejek"]],
+    ["Saat guru menjelaskan pelajaran, kita sebaiknya...","Memperhatikan",["Mengobrol","Tidur","Bermain"]],
+    ["Jika belum memahami pelajaran, kita sebaiknya...","Bertanya dengan sopan",["Marah","Meninggalkan kelas","Mengganggu teman"]],
+    ["Jika datang terlambat ke sekolah, kita sebaiknya...","Meminta maaf dengan sopan",["Menyalahkan guru","Berteriak","Pura-pura tidak terlambat"]],
+    ["Jika mendapat tugas dari guru, kita sebaiknya...","Mengerjakannya dengan sungguh-sungguh",["Mengabaikannya","Menyuruh orang lain","Merusaknya"]],
+    ["Jika lupa membawa buku, kita sebaiknya...","Mengatakan yang sebenarnya kepada guru",["Berbohong","Menyalahkan teman","Kabur"]],
+    ["Saat ujian, kita harus...","Jujur",["Menyontek","Melihat jawaban teman","Bertanya diam-diam"]],
+    ["Menyontek saat ujian adalah perbuatan...","Tidak jujur",["Terpuji","Hebat","Wajib"]],
+    ["Jika mendapat nilai bagus, kita sebaiknya...","Bersyukur dan tidak sombong",["Mengejek teman","Membanggakan diri","Merendahkan teman"]],
+    ["Jika mendapat nilai kurang bagus, kita sebaiknya...","Belajar lebih giat",["Menyerah","Marah kepada guru","Menyalahkan teman"]],
+    ["Jika teman lupa membawa pensil, kita dapat...","Meminjamkan jika punya cadangan",["Mengejek","Menyembunyikan pensil","Membiarkannya"]],
+    ["Jika teman jatuh, kita sebaiknya...","Menolongnya",["Menertawakan","Memotretnya","Pergi"]],
+    ["Jika teman sedang sedih, kita sebaiknya...","Menghibur dan menasihatinya dengan baik",["Mengejek","Menjauhi","Membuatnya semakin sedih"]],
+    ["Jika teman berhasil memenangkan lomba, kita sebaiknya...","Mengucapkan selamat",["Iri","Mengejek","Marah"]],
+    ["Jika adam kalah bermain, maka sebaiknya...","Menerima dengan lapang dada",["Marah","Menuduh curang","Merusak permainan"]],
+    ["Jika fikar bermain, maka sebaiknya...","Tidak sombong",["Mengejek lawan","Berteriak mengejek","Merendahkan teman"]],
+    ["Saat ino bermain bersama, maka harus...","Mematuhi aturan",["Curang","Mengubah aturan sesuka hati","Marah"]],
+    ["Jika teman berbeda pendapat, kita sebaiknya...","Menghargai pendapatnya",["Memaksa","Mengejek","Marah"]],
+    ["Jika tidak setuju dengan teman, kita sebaiknya...","Berbicara dengan sopan",["Berteriak","Menghina","Memukul"]],
+    ["Jika teman melakukan kesalahan, kita sebaiknya...","Menegur dengan baik",["Mengejek","Menyebarkan kesalahannya","Mempermalukannya"]],
+    ["Jika menemukan uang di kelas, kita sebaiknya...","Menyerahkannya kepada guru",["Mengambilnya","Menyembunyikannya","Membelanjakannya"]],
+    ["Jika menemukan barang teman, kita sebaiknya...","Mengembalikannya",["Menyimpan untuk diri sendiri","Menyembunyikan","Membuangnya"]],
+    ["Jika meminjam barang teman, kita harus...","Mengembalikannya",["Menghilangkannya","Merusaknya","Menyembunyikannya"]],
+    ["Jika merusakkan barang milik teman, kita sebaiknya...","Mengaku dan bertanggung jawab",["Berbohong","Kabur","Menyalahkan orang lain"]],
+    ["Jika berjanji kepada teman, kita sebaiknya...","Menepatinya",["Melupakannya","Mengingkarinya","Menertawakannya"]],
+    ["Jika tidak dapat memenuhi janji, kita sebaiknya...","Menjelaskan dengan jujur dan meminta maaf",["Berbohong","Menghilang","Menyalahkan teman"]],
+    ["Berkata sesuai kenyataan disebut...","Jujur",["Curang","Sombong","Malas"]],
+    ["Mengambil barang orang lain tanpa izin disebut...","Tidak amanah",["Rajin","Sopan","Jujur"]],
+    ["Orang yang dapat dipercaya disebut...","Amanah",["Pemalas","Pemarah","Pendendam"]],
+    ["Jika diberi titipan oleh teman, kita harus...","Menjaganya dengan baik",["Membukanya tanpa izin","Menghilangkannya","Menjualnya"]],
+    ["Saat berada di masjid, kita sebaiknya...","Menjaga ketenangan",["Berteriak","Berlari","Bermain kejar-kejaran"]],
+    ["Jika melihat sampah di masjid, kita sebaiknya...","Memungut dan membuangnya pada tempatnya",["Membiarkan","Menendang","Menambah sampah"]],
+    ["Saat orang lain sedang salat, kita sebaiknya...","Tidak mengganggunya",["Mengajak bicara","Berteriak","Bermain di dekatnya"]],
+    ["Saat mendengar azan, seorang muslim sebaiknya...","Menghormati dan bersiap untuk salat",["Berteriak","Menertawakan","Mengabaikan dengan sengaja"]],
+    ["Jika sudah masuk waktu salat, kita sebaiknya...","Bersiap untuk melaksanakan salat",["Terus bermain tanpa peduli","Tidur","Bermain game terus"]],
+    ["Pakaian untuk salat sebaiknya...","Bersih dan menutup aurat",["Kotor","Robek","Tidak pantas"]],
+    ["Sebelum salat kita melakukan...","Wudu jika diperlukan",["Makan banyak","Bermain","Tidur"]],
+    ["Setelah berwudu, kita sebaiknya...","Menjaga wudu dan bersiap salat",["Mengotori diri","Bermain air terus","Berlari-lari"]],
+    ["Saat membaca Al-Qur'an, kita sebaiknya...","Menjaga adab dan menghormatinya",["Bermain","Bercanda keras","Meletakkannya sembarangan"]],
+    ["Al-Qur'an sebaiknya diperlakukan dengan...","Hormat",["Sembarangan","Dilempar","Ditaruh di lantai sembarangan"]],
+    ["Saat berbicara dengan orang tua, kita sebaiknya...","Menggunakan kata-kata yang sopan",["Berteriak","Membentak","Menghina"]],
+    ["Jika orang tua memberi nasihat, kita sebaiknya...","Mendengarkan dengan baik",["Membantah kasar","Pergi","Menertawakan"]],
+    ["Berbicara dengan suara keras kepada orang tua dengan kasar adalah...","Perbuatan yang tidak baik",["Sopan","Terpuji","Wajib"]],
+    ["Jika ingin meminta sesuatu kepada ayah, sebaiknya...","Meminta dengan sopan",["Memaksa","Berteriak","Membentak"]],
+    ["Jika keinginan kita belum dipenuhi orang tua, sebaiknya...","Bersabar",["Marah","Menangis sambil merusak barang","Membentak"]],
+    ["Jika ibu sedang sakit, kita sebaiknya...","Membantu dan mendoakannya",["Mengganggu","Meminta banyak hal","Bermain berisik"]],
+    ["Jika ayah pulang kerja dan terlihat lelah, kita sebaiknya...","Menyambut dengan baik dan tidak mengganggu",["Berteriak","Meminta bermain terus","Mengganggu"]],
+    ["Jika adik membutuhkan bantuan, kakak sebaiknya...","Membantu dengan kasih sayang",["Mengejek","Memarahinya","Meninggalkannya"]],
+    ["Jika kakak sedang belajar, adik sebaiknya...","Tidak mengganggunya",["Berteriak","Mengambil bukunya","Mengajak bermain terus"]],
+    ["Kasih sayang kepada keluarga dapat ditunjukkan dengan...","Saling membantu dan menghormati",["Saling mengejek","Bertengkar","Saling menyalahkan"]],
+    ["Jika melihat teman berbohong, sebaiknya kita...","Mengingatkannya dengan baik",["Mengikutinya","Menyebarkan kebohongannya","Menertawakannya"]],
+    ["Jika kita berbuat salah tetapi tidak ada yang melihat, kita tetap harus...","Jujur",["Berbohong","Menyembunyikannya","Menyalahkan orang lain"]],
+    ["Kejujuran harus dilakukan...","Kapan saja",["Saat ada guru saja","Saat dilihat orang saja","Saat mendapat hadiah saja"]],
+    ["Jika mendapat uang kembalian lebih dari penjual, kita sebaiknya...","Mengembalikannya",["Menyimpannya","Membelanjakannya","Menyembunyikannya"]],
+    ["Jika kasir salah menghitung dan kita mendapat keuntungan, sikap yang benar adalah...","Memberitahu kasir",["Diam saja","Menertawakan","Pergi cepat"]],
+    ["Jika lupa mengerjakan PR, kita sebaiknya...","Mengatakan yang sebenarnya",["Membuat alasan palsu","Menyontek","Menyalahkan teman"]],
+    ["Jika terlambat karena bangun kesiangan, kita sebaiknya...","Mengakui kesalahan dan memperbaiki kebiasaan",["Membuat cerita bohong","Menyalahkan orang tua","Menyalahkan jam"]],
+    ["Jika melakukan kesalahan, orang yang berakhlak baik akan...","Mengakui dan memperbaikinya",["Menutupinya dengan kebohongan","Menyalahkan orang lain","Marah"]],
+    ["Sikap berkata benar disebut...","Kejujuran",["Kesombongan","Kemalasan","Kecurangan"]],
+    ["Sikap bertanggung jawab berarti...","Melaksanakan kewajiban dan berani memperbaiki kesalahan",["Menghindari tugas","Menyalahkan orang lain","Melarikan diri"]],
+    ["Saat bertamu ke rumah orang lain, kita sebaiknya...","Mengucapkan salam dan meminta izin",["Langsung masuk","Berteriak","Membuka semua pintu"]],
+    ["Jika tuan rumah belum membukakan pintu, kita sebaiknya...","Menunggu dengan sabar",["Membuka pintu sendiri","Berteriak keras","Marah"]],
+    ["Saat bertamu, kita sebaiknya...","Menjaga sopan santun",["Mengacak-acak rumah","Membuka lemari","Berteriak"]],
+    ["Jika diberi minuman oleh tuan rumah, kita sebaiknya...","Menerima dengan sopan dan berterima kasih",["Menolak dengan kasar","Mencela","Membuangnya"]],
+    ["Sebelum masuk kamar orang lain, kita sebaiknya...","Meminta izin",["Langsung masuk","Membuka pintu keras-keras","Mengintip"]],
+    ["Barang pribadi orang lain sebaiknya...","Tidak dibuka tanpa izin",["Dibuka karena penasaran","Diperiksa","Disembunyikan"]],
+    ["Jika melihat teman memiliki barang baru, kita sebaiknya...","Menghargainya dan tidak iri",["Mengejek","Meminta dengan paksa","Merusaknya"]],
+    ["Jika teman memiliki makanan, kita sebaiknya...","Tidak mengambil tanpa izin",["Merebut","Mengambil diam-diam","Memaksa"]],
+    ["Jika teman meminta bantuan dengan sopan, kita sebaiknya...","Membantu jika mampu",["Mengejek","Menolak dengan kasar","Mengganggunya"]],
+    ["Jika tidak bisa membantu teman, kita sebaiknya...","Menjelaskan dengan sopan",["Marah","Menghina","Meninggalkannya tanpa bicara"]],
+    ["Menjaga rahasia yang baik dari teman merupakan sikap...","Amanah",["Curang","Sombong","Pemarah"]],
+    ["Jika teman bercerita tentang masalah pribadinya, kita sebaiknya...","Tidak menyebarkannya sembarangan",["Menceritakan kepada semua orang","Menertawakan","Membuat gosip"]],
+    ["Jika menerima pesan pribadi teman, sebaiknya...","Menjaga privasinya",["Menyebarkannya","Membagikannya tanpa izin","Mengejek"]],
+    ["Saat menggunakan internet, kita sebaiknya...","Menggunakannya untuk hal yang baik",["Menghina orang","Menyebarkan fitnah","Menipu"]],
+    ["Jika melihat komentar kasar di internet, kita sebaiknya...","Tidak ikut berkata kasar",["Membalas lebih kasar","Menyebarkannya","Menghina"]],
+    ["Sebelum mengunggah foto teman, sebaiknya...","Meminta izin",["Langsung mengunggah","Mengedit untuk mengejek","Menyebarkan"]],
+    ["Jika mendapat berita yang belum jelas, sebaiknya...","Memeriksa kebenarannya",["Langsung menyebarkan","Menambah cerita","Membuat judul palsu"]],
+    ["Menyebarkan berita palsu dapat...","Merugikan orang lain",["Selalu menyenangkan","Membantu semua orang","Menjadi amal baik"]],
+    ["Saat bermain game online, kita sebaiknya...","Tetap sopan kepada pemain lain",["Menghina","Mengancam","Marah-marah"]],
+    ["Jika kalah dalam game online, kita sebaiknya...","Menerima kekalahan dengan sportif",["Menghina lawan","Merusak perangkat","Keluar sambil memaki"]],
+    ["Jika melihat orang tua membawa barang berat, kita sebaiknya...","Menawarkan bantuan",["Menertawakan","Membiarkan","Pergi"]],
+    ["Jika melihat orang yang lebih tua ingin duduk, kita sebaiknya...","Memberikan tempat jika memungkinkan",["Merebut kursi","Berpura-pura tidur","Mengejek"]],
+    ["Saat berada di kendaraan umum, kita sebaiknya...","Menjaga ketertiban dan kesopanan",["Berteriak","Berlari-lari","Mengganggu penumpang"]],
+    ["Jika ada orang yang lebih membutuhkan tempat duduk, kita dapat...","Mempersilakannya duduk",["Menolaknya","Mengejek","Merebut kursinya"]],
+    ["Saat berjalan bersama orang tua, kita sebaiknya...","Menjaga sikap dan tidak membuat mereka khawatir",["Pergi jauh tanpa izin","Berlari ke jalan","Menghilang"]],
+    ["Saat menyeberang jalan, kita harus...","Berhati-hati dan mengikuti aturan",["Berlari sembarangan","Bermain di jalan","Tidak melihat kendaraan"]],
+    ["Jika melihat lampu lalu lintas merah, kita harus...","Berhenti",["Terus berjalan","Berlari","Menutup mata"]],
+    ["Menjaga keselamatan diri merupakan...","Tanggung jawab",["Hal yang tidak penting","Permainan","Beban orang lain"]],
+    ["Jika menemukan hewan yang terluka, kita sebaiknya...","Meminta bantuan orang dewasa",["Menyiksanya","Menertawakan","Mengganggunya"]],
+    ["Menyayangi hewan termasuk...","Perbuatan baik",["Perbuatan buruk","Kecurangan","Kesombongan"]],
+    ["Jika mendapat pujian, kita sebaiknya...","Bersyukur dan tidak sombong",["Membanggakan diri","Mengejek orang lain","Merendahkan teman"]],
+    ["Jika diberi amanah menjadi ketua kelompok, kita sebaiknya...","Menjalankan tugas dengan adil",["Menyuruh semua orang bekerja","Bermalas-malasan","Memilih teman favorit saja"]],
+    ["Ketika bekerja dalam kelompok, kita sebaiknya...","Saling membantu",["Saling menyalahkan","Bermain sendiri","Menghindari tugas"]],
+    ["Jika teman melakukan bagian tugasnya dengan baik, kita sebaiknya...","Menghargainya",["Mengejek","Mengambil hasilnya tanpa izin","Meremehkan"]],
+    ["Jika tugas kelompok belum selesai, kita sebaiknya...","Bekerja sama",["Menyalahkan teman","Meninggalkan kelompok","Bermain"]],
+    ["Jika kita diberi tugas membersihkan kelas, sebaiknya...","Melaksanakannya dengan tanggung jawab",["Menghindar","Menyuruh teman saja","Membuat kelas lebih kotor"]],
+    ["Setelah menggunakan papan tulis, kita sebaiknya...","Membersihkannya jika menjadi tugas kita",["Membiarkannya","Mencoret-coret","Mengotori lagi"]],
+    ["Sampah plastik sebaiknya...","Dibuang pada tempatnya",["Dilempar ke sungai","Ditinggalkan","Dibakar sembarangan"]],
+    ["Menghemat air saat wudu adalah sikap...","Tidak berlebihan",["Boros","Ceroboh","Malas"]],
+    ["Mematikan lampu saat tidak digunakan merupakan contoh...","Hemat energi",["Pemborosan","Kemalasan","Kecerobohan"]],
+    ["Jika melihat teman sendirian, kita sebaiknya...","Menyapa dan mengajaknya dengan baik",["Mengejek","Mengabaikan","Menakut-nakuti"]],
+    ["Jika teman baru datang ke kelas, kita sebaiknya...","Menyambutnya dengan ramah",["Mengejek","Mendiamkan","Mengganggunya"]],
+    ["Jika teman berasal dari daerah berbeda, kita sebaiknya...","Menghargainya",["Mengejek logatnya","Menghina","Menjauhinya"]],
+    ["Jika ada teman yang belum bisa membaca dengan lancar, kita sebaiknya...","Membantunya dengan sabar",["Menertawakan","Mengejek","Menghindar"]],
+    ["Jika teman salah menjawab pertanyaan, kita sebaiknya...","Tidak mengejeknya",["Menertawakan","Mempermalukan","Menghina"]],
+    ["Jika teman meminta maaf kepada kita, sebaiknya...","Memaafkannya",["Membalas dendam","Terus mengejek","Mengungkit kesalahannya"]],
+    ["Memaafkan kesalahan orang lain merupakan sikap...","Terpuji",["Buruk","Curang","Sombong"]],
+    ["Jika terjadi perselisihan dengan teman, sebaiknya...","Menyelesaikannya dengan damai",["Berkelahi","Mengadu domba","Membalas"]],
+    ["Mengucapkan salam ketika bertemu sesama muslim adalah...","Adab yang baik",["Perbuatan buruk","Perbuatan sia-sia","Larangan"]],
+    ["Senyum kepada orang lain dengan niat baik merupakan...","Akhlak yang baik",["Kesalahan","Perbuatan tercela","Kecurangan"]]
+];
+
+const words=["KAMPUNG","KEBON","SEPEDA","SAHABAT","SEKOLAH","PESAWAT","PELAJAR","BINTANG","KELUARGA","NUSANTARA"];
+let user=localStorage.getItem('gkr_user')||'', currentGame='', score=0, timer=null, gameCleanup=null;
+
+function switchScreen(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function login(){let v=document.getElementById('username').value.trim();if(!v)return toast('Masukkan nama pemain dulu 😊');user=v;localStorage.setItem('gkr_user',user);updateDashboard();switchScreen('dashboard-screen')}
+function logout(){stopGame();localStorage.removeItem('gkr_user');user='';document.getElementById('username').value='';switchScreen('login-screen')}
+function key(id){return `gkr_${id}_${user}`}
+function best(id){return +(localStorage.getItem(key(id))||0)}
+function saveScore(id,val){val=Math.max(0,Math.floor(val));if(val>best(id))localStorage.setItem(key(id),val);let lb=JSON.parse(localStorage.getItem('gkr_lb')||'[]');lb.push({name:user,game:id,score:val,time:Date.now()});localStorage.setItem('gkr_lb',JSON.stringify(lb));updateDashboard()}
+function updateDashboard(){
+ document.getElementById('greeting').textContent=user||'Pemain';
+ const grid=document.getElementById('game-grid');
+ grid.innerHTML=GAMES.map(g=>{
+     let iconHTML = g.icon ? `<img src="${g.icon}" class="game-icon-img" alt="${g.name}"/>` : `<div class="game-icon" style="height:100px; font-size:52px; display:grid; place-items:center; background:linear-gradient(135deg,#e7faf3,#fff4d8); border-radius:18px; margin-bottom:15px;">${g.defaultIcon}</div>`;
+     return `<div class="card game-card">${iconHTML}<h3>${g.name}</h3><p class="muted">${g.desc}</p><div class="game-meta"><span class="score-pill">🏆 Best: <b>${best(g.id)}</b></span><button class="btn primary small" onclick="startGame('${g.id}')">Main</button></div></div>`;
+ }).join('');
+ let scores=GAMES.map(g=>({g,score:best(g.id)})).sort((a,b)=>b.score-a.score), total=scores.reduce((a,x)=>a+x.score,0);
+ document.getElementById('best-total').textContent=total;document.getElementById('best-game').textContent=scores[0]?.score?scores[0].g.name:'-';
+ let lb=JSON.parse(localStorage.getItem('gkr_lb')||'[]');document.getElementById('games-played').textContent=lb.filter(x=>x.name===user).length;
+}
+function startGame(id){
+ stopGame();currentGame=id;score=0;document.getElementById('current-score').textContent='0';document.getElementById('game-timer').textContent='';
+ let g=GAMES.find(x=>x.id===id);document.getElementById('game-title').textContent=g.name;document.getElementById('game-subtitle').textContent=g.desc;document.getElementById('arena').innerHTML='';switchScreen('game-screen');
+ ({memory:startMemory,puzzle:startPuzzle,jigsaw:startJigsaw,catch:startCatch,quiz:startQuiz,reaction:startReaction,math:startMath,whack:startWhack,typing:startTyping})[id]();
+}
+function stopGame(){if(timer){clearInterval(timer);timer=null}if(gameCleanup){gameCleanup();gameCleanup=null}}
+function exitGame(){stopGame();updateDashboard();switchScreen('dashboard-screen')}
+function finish(id,val,msg='Permainan selesai!'){stopGame();score=val;document.getElementById('current-score').textContent=val;saveScore(id,val);setTimeout(()=>{toast(`${msg} Skor: ${val}`);updateDashboard();switchScreen('dashboard-screen')},200)}
+function setScore(v){score=Math.max(0,Math.floor(v));document.getElementById('current-score').textContent=score}
+function toggleFullscreen(){if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.()}
+function toast(msg){let t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
+
+
+function startMemory(){
+ const arena=document.getElementById('arena');
+ let imagesToUse = [...familyImages].sort(() => Math.random() - 0.5).slice(0, 8);
+ let deck = [...imagesToUse, ...imagesToUse].sort(() => Math.random() - 0.5);
+ let open=[],matched=0,moves=0,lock=false;
+ arena.innerHTML=`<p>Temukan 8 pasangan foto keluarga.</p><div class="memory-grid"></div>`;
+ let grid=arena.querySelector('.memory-grid');
+ 
+ deck.forEach((imgSrc)=>{
+  let b=document.createElement('button');
+  b.className='memory-card back';
+  b.dataset.src = imgSrc; 
+  
+  b.onclick=()=>{
+   if(lock||b.classList.contains('open')||b.classList.contains('matched'))return;
+   b.classList.remove('back');
+   b.classList.add('open');
+   b.style.backgroundImage = `url('${imgSrc}')`; 
+   open.push(b);
+   
+   if(open.length===2){
+    moves++;
+    lock=true;
+    setTimeout(()=>{
+     if(open[0].dataset.src === open[1].dataset.src){
+      open.forEach(x=>x.classList.add('matched'));
+      matched+=2;
+      setScore(score+100);
+     }else{
+      open.forEach(x=>{
+       x.classList.add('back');
+       x.classList.remove('open');
+       x.style.backgroundImage = ''; 
+      });
+     }
+     open=[];
+     lock=false;
+     if(matched===16)finish('memory',score+Math.max(0,800-moves*15),'Memory selesai!')
+    },600)
+   }
+  };
+  grid.appendChild(b);
+ });
+}
+
+function startPuzzle(){
+ const arena=document.getElementById('arena');
+ let imgSrc = familyImages[Math.floor(Math.random() * familyImages.length)];
+ let a=[1,2,3,4,5,6,7,8,0],moves=0;
+ for(let i=0;i<120;i++){let z=a.indexOf(0),opts=[z-1,z+1,z-3,z+3].filter(x=>x>=0&&x<9&&Math.abs(Math.floor(x/3)-Math.floor(z/3))+Math.abs(x%3-z%3)===1);let n=opts[Math.floor(Math.random()*opts.length)];[a[z],a[n]]=[a[n],a[z]]}
+ arena.innerHTML=`<p>Geser kotak (menyisakan 1 kotak kosong di pojok kanan bawah).</p><div class="puzzle"></div><p class="muted">Langkah: <b id="moves">0</b></p>`;
+ let grid=arena.querySelector('.puzzle');
+ 
+ function render(){
+  grid.innerHTML='';
+  a.forEach((v,i)=>{
+   let b=document.createElement('button');
+   b.className='tile'+(v===0?' empty':'');
+   if(v !== 0){
+    b.style.backgroundImage = `url('${imgSrc}')`;
+    b.style.backgroundSize = '300% 300%'; 
+    b.style.backgroundPosition = `${((v-1)%3)*50}% ${Math.floor((v-1)/3)*50}%`;
+    b.onclick=()=>{
+     let z=a.indexOf(0);
+     if(Math.abs(Math.floor(i/3)-Math.floor(z/3))+Math.abs(i%3-z%3)!==1)return;
+     [a[i],a[z]]=[a[z],a[i]];
+     moves++;
+     document.getElementById('moves').textContent=moves;
+     setScore(Math.max(100,3000-moves*35));
+     render();
+     if(a.join(',')==='1,2,3,4,5,6,7,8,0')finish('puzzle',score,'Puzzle berhasil!')
+    };
+   }
+   grid.appendChild(b);
+  })
+ }
+ render();
+}
+
+function startJigsaw(){
+ const arena=document.getElementById('arena');
+ let imgSrc = familyImages[Math.floor(Math.random() * familyImages.length)];
+ let order = [0,1,2,3,4,5,6,7,8].sort(() => Math.random() - 0.5);
+ 
+ arena.innerHTML=`<p>Tukar potongan kepingan untuk merakit gambar yang utuh.</p><div class="puzzle" id="jigsaw-grid"></div><p class="muted">Langkah: <b id="jigsaw-moves">0</b></p>`;
+ let grid=arena.querySelector('#jigsaw-grid');
+ let selected = null, moves = 0;
+
+ function render(){
+  grid.innerHTML='';
+  order.forEach((pieceIndex) => {
+   let b = document.createElement('button');
+   b.className = 'tile';
+   
+   if(pieceIndex === selected){ 
+       b.style.outline = '4px solid #f59e0b'; 
+       b.style.zIndex = '2'; 
+       b.style.transform = 'scale(0.85)'; 
+   }
+   
+   b.style.backgroundImage = `url('${imgSrc}')`;
+   b.style.backgroundSize = '300% 300%';
+   b.style.backgroundPosition = `${(pieceIndex%3)*50}% ${Math.floor(pieceIndex/3)*50}%`;
+   
+   b.onclick = () => {
+    if(selected === null){
+     selected = pieceIndex;
+    } else {
+     let swapIndex = order.indexOf(pieceIndex);
+     let selectedIdxOrder = order.indexOf(selected);
+     [order[selectedIdxOrder], order[swapIndex]] = [order[swapIndex], order[selectedIdxOrder]];
+     moves++;
+     document.getElementById('jigsaw-moves').textContent = moves;
+     setScore(Math.max(100, 3000 - moves*50));
+     selected = null;
+     if(order.every((v,i) => v===i)) finish('jigsaw', score, 'Jigsaw berhasil!');
     }
+    render();
+   };
+   grid.appendChild(b);
+  });
+ }
+ render();
+}
 
-    function switchScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-    }
+function startCatch(){
+ const arena=document.getElementById('arena');
+ let left=30;
+ arena.innerHTML=`<div class="catch-area"></div><p>Waktu tersisa: <b id="time">30</b> detik • Tangkap foto!</p>`;
+ let area=arena.querySelector('.catch-area');
+ 
+ function move(target){
+  target.style.left=Math.max(0,Math.random()*(area.clientWidth-70))+'px';
+  target.style.top=Math.max(0,Math.random()*(area.clientHeight-70))+'px';
+ }
 
-    function login() {
-        const val = document.getElementById('username-input').value.trim();
-        if(!val) return alert("Isi nama dulu!");
-        currentUser = val;
-        localStorage.setItem('wg_user', currentUser);
-        updateDash();
-        switchScreen('dashboard-screen');
-    }
+ function spawn(){
+  let b=document.createElement('button');
+  b.className='target';
+  b.style.backgroundImage = `url('${familyImages[Math.floor(Math.random() * familyImages.length)]}')`;
+  b.onclick=()=>{
+   setScore(score+10);
+   b.remove();
+  };
+  area.appendChild(b);
+  move(b);
+ }
 
-    function logout() {
-        localStorage.removeItem('wg_user');
-        currentUser = "";
-        switchScreen('login-screen');
-    }
+ timer=setInterval(()=>{
+  left--;
+  document.getElementById('time').textContent=left;
+  if(Math.random()<.65) spawn();
+  if(left<=0) finish('catch',score,'Waktu habis!')
+ },1000);
+}
 
-    function updateDash() {
-        document.getElementById('user-greeting').innerText = currentUser;
-        document.getElementById('active-player').innerText = currentUser;
-        document.getElementById('sc-memory').innerText = localStorage.getItem('wg_sc_memory_'+currentUser) || 0;
-        document.getElementById('sc-puzzle').innerText = localStorage.getItem('wg_sc_puzzle_'+currentUser) || 0;
-        document.getElementById('sc-catch').innerText = localStorage.getItem('wg_sc_catch_'+currentUser) || 0;
-    }
+// --- FUNGSI KUIS CEPAT YANG SUDAH DIPERBARUI ---
+function startQuiz(){
+ const arena = document.getElementById('arena');
+ 
+ // Menampilkan layar pemilihan jumlah soal di awal Kuis Cepat
+ arena.innerHTML = `
+  <div class="quiz-box" style="text-align:center;">
+   <h2>Pilih Jumlah Soal</h2>
+   <p class="muted">Berapa soal yang ingin kamu kerjakan hari ini?</p>
+   <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;" id="quiz-selector">
+    <button class="btn primary">10 Soal</button>
+    <button class="btn primary">20 Soal</button>
+    <button class="btn primary">30 Soal</button>
+   </div>
+  </div>
+ `;
+ 
+ // Mengikat aksi klik untuk setiap tombol jumlah soal
+ let btns = arena.querySelectorAll('#quiz-selector button');
+ [10, 20, 30].forEach((num, i) => {
+   btns[i].onclick = () => jalankanKuisLoop(num);
+ });
 
-    function saveScore(gameType, finalScore) {
-        let currentBest = parseInt(localStorage.getItem('wg_sc_'+gameType+'_'+currentUser)) || 0;
-        if(finalScore > currentBest) {
-            localStorage.setItem('wg_sc_'+gameType+'_'+currentUser, finalScore);
-        }
-        
-        // Save to global list
-        let lb = JSON.parse(localStorage.getItem('wg_leaderboard')) || [];
-        lb.push({name: currentUser, game: gameType, score: finalScore});
-        localStorage.setItem('wg_leaderboard', JSON.stringify(lb));
-    }
+ function jalankanKuisLoop(jumlahSoal){
+   let q = 0, correct = 0;
+   
+   // Mengacak seluruh array bank soal, lalu mengambil hanya sejumlah yang dipilih
+   let shuffledQuiz = [...quizData].sort(() => Math.random() - 0.5);
+   let selectedQuiz = shuffledQuiz.slice(0, Math.min(jumlahSoal, quizData.length));
+   
+   arena.innerHTML = '<div class="quiz-box"></div>';
+   let box = arena.querySelector('.quiz-box');
+   
+   function next(){
+     if(q >= selectedQuiz.length){
+       finish('quiz', correct * 100, 'Kuis selesai!');
+       return;
+     }
+     
+     // Mengambil satu set soal dari daftar yang telah dipilih dan diacak
+     let [question, ans, wrong] = selectedQuiz[q];
+     let opts = [ans, ...wrong].sort(() => Math.random() - 0.5);
+     
+     box.innerHTML = `
+       <div class="badge" style="background:#e7faf3;color:#0f766e">Pertanyaan ${q + 1}/${selectedQuiz.length}</div>
+       <h2>${question}</h2>
+       <div class="quiz-options">${opts.map(o => `<button class="option">${o}</button>`).join('')}</div>
+     `;
+     
+     box.querySelectorAll('.option').forEach(b => {
+       b.onclick = () => {
+         let ok = b.textContent === ans;
+         b.classList.add(ok ? 'correct' : 'wrong');
+         if(ok){
+           correct++;
+           setScore(correct * 100);
+         }
+         setTimeout(() => { q++; next(); }, 450);
+       };
+     });
+   }
+   
+   // Memulai soal pertama setelah jumlah ditentukan
+   next();
+ }
+}
+// ------------------------------------------------
 
-    function exitGame() {
-        clearInterval(gameInterval);
-        document.getElementById('game-arena').innerHTML = "";
-        updateDash();
-        switchScreen('dashboard-screen');
-        if (document.fullscreenElement) document.exitFullscreen();
-    }
+function startReaction(){
+ const arena=document.getElementById('arena');arena.innerHTML=`<p id="react-text">Tekan tombol saat berubah HIJAU. Jangan terlalu cepat!</p><button id="react" class="reaction-pad">Tunggu...</button>`;let b=arena.querySelector('#react'),state='wait',start=0;
+ function arm(){state='wait';b.className='reaction-pad';b.textContent='Tunggu...';let delay=1200+Math.random()*3200;timer=setTimeout(()=>{state='go';start=performance.now();b.className='reaction-pad go';b.textContent='KLIK SEKARANG!'},delay)}
+ b.onclick=()=>{if(state==='wait'){clearTimeout(timer);toast('Terlalu cepat! Coba lagi.');arm()}else{let ms=Math.round(performance.now()-start),pts=Math.max(50,1000-ms);setScore(pts);finish('reaction',pts,`Reaksi ${ms} ms!`)}};
+ arm();
+}
 
-    function startGame(type) {
-        currentGame = type;
-        score = 0;
-        document.getElementById('current-score').innerText = score;
-        const arena = document.getElementById('game-arena');
-        arena.innerHTML = "";
-        switchScreen('game-screen');
+function startMath(){
+ const arena=document.getElementById('arena');let left=20,correct=0;
+ arena.innerHTML=`<div class="badge" style="background:#e7faf3;color:#0f766e">20 detik</div><div class="math-question" id="mq"></div><div class="math-options" id="mo"></div>`;
+ function next(){let a=Math.floor(Math.random()*20)+1,b=Math.floor(Math.random()*15)+1,ops=['+','-','×'],op=ops[Math.floor(Math.random()*ops.length)],ans=op==='+'?a+b:op==='-'?a-b:a*b;document.getElementById('mq').textContent=`${a} ${op} ${b} = ?`;let choices=[ans,ans+Math.ceil(Math.random()*6),ans-Math.ceil(Math.random()*5),ans+Math.ceil(Math.random()*10)].sort(()=>Math.random()-.5);document.getElementById('mo').innerHTML=choices.map(x=>`<button>${x}</button>`).join('');document.querySelectorAll('#mo button').forEach(x=>x.onclick=()=>{if(+x.textContent===ans){correct++;setScore(correct*100)}next()})}
+ next();timer=setInterval(()=>{left--;document.getElementById('game-timer').textContent=`⏱️ ${left}s`;if(left<=0)finish('math',score,'Waktu habis!')},1000);
+}
 
-        if(type === 'memory') startMemory(arena);
-        if(type === 'puzzle') startPuzzle(arena);
-        if(type === 'catch') startCatch(arena);
-    }
+function startWhack(){
+ const arena=document.getElementById('arena');let left=20;
+ arena.innerHTML=`<p>Waktu: <b id="wt">20</b> detik</p><div class="whack-grid"></div>`;let grid=arena.querySelector('.whack-grid'),holes=[];
+ for(let i=0;i<9;i++){let b=document.createElement('button');b.className='hole';b.onclick=()=>{if(b.classList.contains('active')){setScore(score+10);b.classList.remove('active');spawn()}};grid.appendChild(b);holes.push(b)}
+ function spawn(){holes.forEach(x=>x.classList.remove('active'));holes[Math.floor(Math.random()*holes.length)].classList.add('active')}
+ spawn();timer=setInterval(()=>{left--;document.getElementById('wt').textContent=left;spawn();if(left<=0)finish('whack',score,'Waktu habis!')},1000);
+}
 
-    // --- GAME 1: MEMORY MATCH ---
-    function startMemory(arena) {
-        let deck = [...images, images[0]]; // 8 unique images needed, we have 7, duplicate 1st to make 8
-        deck = [...deck, ...deck].sort(() => 0.5 - Math.random()); // 16 cards total
-        
-        const grid = document.createElement('div');
-        grid.className = 'memory-grid';
-        let flipped = [];
-        let matched = 0;
-        let moves = 0;
+function startTyping(){
+ const arena=document.getElementById('arena');let left=30,done=0,current='';
+ arena.innerHTML=`<p>Ketik kata yang tampil secepat mungkin.</p><div class="typing-word" id="word"></div><input id="typein" class="input" autocomplete="off" autocapitalize="characters" placeholder="Ketik di sini..."><p>Waktu: <b id="tt">30</b> detik</p>`;
+ let inp=arena.querySelector('#typein'),word=arena.querySelector('#word');
+ function next(){current=words[Math.floor(Math.random()*words.length)];word.textContent=current;inp.value='';inp.focus()}
+ inp.oninput=()=>{if(inp.value.toUpperCase()===current){done++;setScore(done*100);next()}}
+ next();timer=setInterval(()=>{left--;document.getElementById('tt').textContent=left;if(left<=0)finish('typing',score,'Selesai mengetik!')},1000);
+}
 
-        deck.forEach((imgSrc, idx) => {
-            let card = document.createElement('div');
-            card.className = 'memory-card hidden';
-            card.dataset.val = imgSrc;
-            card.innerText = "?";
-            
-            card.onclick = () => {
-                if(flipped.length < 2 && card.classList.contains('hidden')) {
-                    card.classList.remove('hidden');
-                    card.style.backgroundImage = `url('${imgSrc}')`;
-                    card.innerText = "";
-                    flipped.push(card);
-
-                    if(flipped.length === 2) {
-                        moves++;
-                        setTimeout(() => {
-                            if(flipped[0].dataset.val === flipped[1].dataset.val) {
-                                matched += 2;
-                                score += 100; // 100 pts per match
-                                document.getElementById('current-score').innerText = score;
-                                if(matched === 16) {
-                                    let finalScore = score + (1000 - moves*10); // Bonus moves
-                                    alert("Menang! Skor: " + finalScore);
-                                    saveScore('memory', finalScore);
-                                    exitGame();
-                                }
-                            } else {
-                                flipped[0].classList.add('hidden'); flipped[0].style.backgroundImage = ''; flipped[0].innerText = "?";
-                                flipped[1].classList.add('hidden'); flipped[1].style.backgroundImage = ''; flipped[1].innerText = "?";
-                            }
-                            flipped = [];
-                        }, 800);
-                    }
-                }
-            };
-            grid.appendChild(card);
-        });
-        arena.appendChild(grid);
-    }
-
-    // --- GAME 2: SLIDE PUZZLE ---
-    function startPuzzle(arena) {
-        let size = 3; // 3x3
-        let puzzleImg = images[0]; // Diorama
-        let grid = document.createElement('div');
-        grid.className = 'puzzle-grid';
-        
-        let tiles = Array.from({length: size*size}, (_, i) => i);
-        // Shuffle solvable (simple random shuffle might be unsolvable, but for simulation we just shuffle)
-        tiles.sort(() => 0.5 - Math.random());
-        
-        let moves = 0;
-
-        function renderPuzzle() {
-            grid.innerHTML = "";
-            let isWin = true;
-            tiles.forEach((val, idx) => {
-                let t = document.createElement('div');
-                t.className = 'puzzle-tile';
-                if(val === size*size - 1) {
-                    t.classList.add('puzzle-empty');
-                } else {
-                    t.style.backgroundImage = `url('${puzzleImg}')`;
-                    let row = Math.floor(val / size);
-                    let col = val % size;
-                    t.style.backgroundPosition = `-${col * 100}px -${row * 100}px`;
-                }
-                if(val !== idx) isWin = false;
-
-                t.onclick = () => {
-                    let emptyIdx = tiles.indexOf(size*size - 1);
-                    // Check if adjacent
-                    let validMoves = [emptyIdx-1, emptyIdx+1, emptyIdx-size, emptyIdx+size];
-                    // Handle edge cases for left/right
-                    if(emptyIdx % size === 0) validMoves = validMoves.filter(m => m !== emptyIdx-1);
-                    if((emptyIdx+1) % size === 0) validMoves = validMoves.filter(m => m !== emptyIdx+1);
-                    
-                    if(validMoves.includes(idx)) {
-                        tiles[emptyIdx] = tiles[idx];
-                        tiles[idx] = size*size - 1;
-                        moves++;
-                        score = Math.max(0, 5000 - (moves * 50));
-                        document.getElementById('current-score').innerText = score;
-                        renderPuzzle();
-                    }
-                };
-                grid.appendChild(t);
-            });
-
-            if(isWin && moves > 0) { // moves > 0 prevents instant win on lucky shuffle
-                setTimeout(() => {
-                    alert("Teka-teki Selesai! Skor: " + score);
-                    saveScore('puzzle', score);
-                    exitGame();
-                }, 100);
-            }
-        }
-        renderPuzzle();
-        
-        let hint = document.createElement('p');
-        hint.innerText = "Klik kotak di sebelah ruang kosong untuk menggeser.";
-        arena.appendChild(grid);
-        arena.appendChild(hint);
-    }
-
-    // --- GAME 3: CATCH OBJECT ---
-    function startCatch(arena) {
-        let area = document.createElement('div');
-        area.id = 'catch-area';
-        let target = document.createElement('div');
-        target.className = 'catch-target';
-        
-        let timeRemaining = 30; // 30 seconds
-        let timerDisplay = document.createElement('h2');
-        timerDisplay.innerText = "Waktu: " + timeRemaining;
-        
-        arena.appendChild(timerDisplay);
-        arena.appendChild(area);
-        area.appendChild(target);
-
-        function moveTarget() {
-            let maxX = area.clientWidth - 60;
-            let maxY = area.clientHeight - 60;
-            target.style.left = Math.floor(Math.random() * maxX) + 'px';
-            target.style.top = Math.floor(Math.random() * maxY) + 'px';
-            // Random image from the array
-            target.style.backgroundImage = `url('${images[Math.floor(Math.random() * images.length)]}')`;
-        }
-        
-        target.onclick = () => {
-            score += 10;
-            document.getElementById('current-score').innerText = score;
-            moveTarget();
-        };
-
-        moveTarget();
-        
-        gameInterval = setInterval(() => {
-            timeRemaining--;
-            timerDisplay.innerText = "Waktu: " + timeRemaining;
-            if(Math.random() > 0.3) moveTarget(); // Sometimes jumps on its own
-            
-            if(timeRemaining <= 0) {
-                clearInterval(gameInterval);
-                alert("Waktu Habis! Skor Akhir: " + score);
-                saveScore('catch', score);
-                exitGame();
-            }
-        }, 1000);
-    }
-
-    // --- LEADERBOARD ---
-    function showLeaderboard() {
-        let lb = JSON.parse(localStorage.getItem('wg_leaderboard')) || [];
-        // Sort by highest score
-        lb.sort((a, b) => b.score - a.score);
-        
-        // Remove duplicates keeping only best score per user per game
-        let uniqueLb = [];
-        let seen = new Set();
-        lb.forEach(entry => {
-            let key = entry.name + "_" + entry.game;
-            if(!seen.has(key)) {
-                seen.add(key);
-                uniqueLb.push(entry);
-            }
-        });
-
-        let content = "<table style='width:100%; border-collapse:collapse; margin-top:20px;'>";
-        content += "<tr style='background:var(--clay-brown); color:white;'><th>Rank</th><th>Pemain</th><th>Game</th><th>Skor</th></tr>";
-        
-        if(uniqueLb.length === 0) content += "<tr><td colspan='4' style='text-align:center;'>Belum ada data skor.</td></tr>";
-        
-        uniqueLb.slice(0, 10).forEach((row, i) => { // Top 10
-            content += `<tr style='border-bottom:1px solid #ccc; text-align:center;'>
-                <td style='padding:10px;'>${i+1}</td>
-                <td>${row.name}</td>
-                <td>${row.game.toUpperCase()}</td>
-                <td>${row.score}</td>
-            </tr>`;
-        });
-        content += "</table>";
-        
-        document.getElementById('lb-content').innerHTML = content;
-        switchScreen('leaderboard-screen');
-    }
-
-    init();
+function showLeaderboard(){
+ let lb=JSON.parse(localStorage.getItem('gkr_lb')||'[]'),bestMap=new Map();
+ lb.forEach(x=>{let k=x.name+'|'+x.game;if(!bestMap.has(k)||x.score>bestMap.get(k).score)bestMap.set(k,x)});
+ let rows=[...bestMap.values()].sort((a,b)=>b.score-a.score).slice(0,20);
+ document.getElementById('lb-content').innerHTML=rows.length?`<table class="table"><tr><th>#</th><th>Pemain</th><th>Game</th><th>Skor</th></tr>${rows.map((x,i)=>`<tr><td>${i<3?['🥇','🥈','🥉'][i]:i+1}</td><td>${escapeHtml(x.name)}</td><td>${GAMES.find(g=>g.id===x.game)?.name||x.game}</td><td><b>${x.score}</b></td></tr>`).join('')}</table>`:'<p class="muted" style="text-align:center">Belum ada skor. Jadilah pemain pertama!</p>';
+ switchScreen('leaderboard-screen');
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+document.getElementById('username').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
+if(user){updateDashboard();switchScreen('dashboard-screen')}
 </script>
 </body>
 </html>
